@@ -1,0 +1,12 @@
+#pragma once
+
+/*
+AVR C++ Standard Library
+Written by Alex Mansfield
+Copyright 2020
+
+C Signals Header
+
+The <csignal> header includes:
+
+*/

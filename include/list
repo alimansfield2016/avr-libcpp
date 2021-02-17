@@ -1,0 +1,180 @@
+#pragma once
+
+#include <initializer_list>
+
+namespace std
+{
+	template <class T>
+	class list
+	{
+	private:
+		struct node
+		{
+			node *prev;
+			T data;
+			node *next;
+		};
+
+		node *head;
+		node *tail;
+		uint16_t m_size;
+
+	public:
+		typedef T value_type;
+		typedef T &reference;
+		typedef const T &const_reference;
+
+		class iterator
+		{
+			friend class list;
+
+		private:
+			mutable node *m_n;
+
+		public:
+			iterator(node *n) : m_n(n) {}
+			iterator &operator++()
+			{
+				m_n = m_n->next;
+				return *this;
+			}
+			const iterator &operator++() const
+			{
+				m_n = m_n->next;
+				return *this;
+			}
+			iterator &operator--()
+			{
+				m_n = m_n->prev;
+				return *this;
+			}
+			const iterator &operator--() const
+			{
+				m_n = m_n->prev;
+				return *this;
+			}
+			reference operator*() { return m_n->data; }
+			const_reference operator*() const { return m_n->data; }
+			constexpr bool operator==(const iterator &one) { return one.m_n == this->m_n; };
+			// bool operator==(const iterator &other) { return m_n == other.m_n; }
+			// bool operator!=(const iterator &other) { return m_n != other.m_n; }
+		};
+		class reverse_iterator
+		{
+			friend class list;
+
+		private:
+			mutable node *m_n;
+
+		public:
+			reverse_iterator(node *n) : m_n(n) {}
+			reverse_iterator &operator++() const
+			{
+				m_n = m_n->prev;
+				return *this;
+			}
+			reverse_iterator &operator--() const
+			{
+				m_n = m_n->next;
+				return *this;
+			}
+			reference operator*() { return m_n->data; }
+			const_reference operator*() const { return m_n->data; }
+			bool operator==(const iterator &other) { return m_n == other.n; }
+			bool operator!=(const iterator &other) { return m_n != other.n; }
+		};
+
+		typedef const iterator const_iterator;
+		typedef const reverse_iterator const_reverse_iterator;
+
+	public:
+		list(const std::initializer_list<value_type> &init)
+			: head(nullptr),
+			  tail(nullptr)
+		{
+			node *cur = head;
+			if (!init.size())
+				return;
+			for (auto e : init)
+			{
+				node *n = new node{cur, e, nullptr};
+				if (cur)
+					cur->next = n;
+				if (!head)
+					head = n;
+				tail = n;
+				cur = n;
+			}
+		}
+
+		list()
+			: head(nullptr),
+			  tail(nullptr)
+		{
+		}
+
+		void push_back(value_type v)
+		{
+			node *n = new node{tail, v, nullptr};
+			if (tail)
+				tail->next = n;
+			tail = n;
+			if (!head)
+				head = n;
+			m_size++;
+		}
+		value_type pop_back()
+		{
+			node *n = tail;
+			if (!n)
+				return;
+			value_type out = n->data;
+			if (n->prev)
+				n->prev->next = nullptr;
+			else
+			{
+				head = nullptr;
+				tail = nullptr;
+			}
+			m_size--;
+			delete n;
+			return out;
+		}
+
+		void erase(const iterator &it)
+		{
+			node *n = it.m_n;
+			if (!n)
+				return;
+			if (n->prev)
+				n->prev->next = n->next;
+			else
+				head = n->next;
+
+			if (n->next)
+				n->next->prev = n->prev;
+			else
+				tail = n->prev;
+
+			delete n;
+		}
+
+		uint16_t size() const { return m_size; }
+
+		iterator begin() { return head; }
+		const_iterator begin() const { return head; }
+		const_iterator cbegin() const { return head; }
+
+		reverse_iterator rbegin() { return end; }
+		const_reverse_iterator rbegin() const { return end; }
+		const_reverse_iterator crbegin() const { return end; }
+
+		iterator end() { return nullptr; }
+		const_iterator end() const { return nullptr; }
+		const_iterator cend() const { return nullptr; }
+
+		reverse_iterator rend() { return nullptr; }
+		const_reverse_iterator rend() const { return nullptr; }
+		const_reverse_iterator crend() const { return nullptr; }
+	};
+} // namespace std
